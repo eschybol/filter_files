@@ -15,16 +15,11 @@ type File struct {
 }
 
 // flag vars -> here are your commandline values my friend ;)
-var searchStringFlag string
 var searchRegexPatternFlag  string
 var fileNameFlag string
 
 func initFlagVars() {
 	defaultValue := ""  
-	// search string command loine flags. (-s <string>, --search_string <string>)
-	flag.StringVar(&searchStringFlag, "s", defaultValue, "Enter a Search Phrase (Shorthand)")
-	flag.StringVar(&searchStringFlag, "search_string", defaultValue, "Enter a Search Phrase")
-
 	flag.StringVar(&searchRegexPatternFlag, "r", defaultValue,"Enter a Regular Expression Pattern (shorthand)")
 	flag.StringVar(&searchRegexPatternFlag, "regular_expression", defaultValue, "Enter a Regular Expression Pattern")
 	
@@ -35,16 +30,9 @@ func initFlagVars() {
 	flag.Parse()
 }
 
-func xor(a, b string) bool {
-	if ((a == "" || b == "") && !(a == "" && b == "")) {
-		return true
-	}
-	return false
-
-}
 
 func checkRequiredArgs() bool {
-	if (fileNameFlag != "") && xor(searchStringFlag, searchRegexPatternFlag) {
+	if (fileNameFlag != "") && (searchRegexPatternFlag != "") {
 		return true
 	}
 	return false
@@ -67,14 +55,9 @@ if regex is used, some parsed regex string,
 or if simple string pattern matching the string*/
 func (f *File) filter() ([][]byte, error)  {
 	var checkPhrase string
-	// check which filter method is used by referencing the command line arguments
-	if searchStringFlag != "" && searchRegexPatternFlag == "" {
-		checkPhrase = searchStringFlag
-	} else if searchStringFlag == "" && searchRegexPatternFlag != "" {
-		checkPhrase = searchRegexPatternFlag
-	} else {
-		log.Fatal(errors.New("Input: Provide Command Line Arguments"))
-	}
+
+	checkPhrase = searchRegexPatternFlag
+
 	// sanitzation?`!
 	re := regexp.MustCompile(checkPhrase)
 	content := re.FindAll(f.Content, -1)
